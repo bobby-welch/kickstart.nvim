@@ -136,6 +136,10 @@ require('lazy').setup({
     'navarasu/onedark.nvim',
     priority = 1000,
     config = function()
+      vim.api.nvim_set_hl(0, 'Spellbad', { sp = 'NONE', undercurl = true })
+      vim.api.nvim_set_hl(0, 'SpellCap', { sp = 'NONE', undercurl = true })
+      vim.api.nvim_set_hl(0, 'SpellLocal', { sp = 'NONE', undercurl = true })
+      vim.api.nvim_set_hl(0, 'SpellRare', { sp = 'NONE', undercurl = true })
       vim.cmd.colorscheme 'onedark'
     end,
   },
@@ -210,7 +214,7 @@ require('lazy').setup({
   --    Uncomment the following line and add your plugins to `lua/custom/plugins/*.lua` to get going.
   --
   --    For additional information see: https://github.com/folke/lazy.nvim#-structuring-your-plugins
-  -- { import = 'custom.plugins' },
+  { import = 'custom.plugins' },
 }, {})
 
 -- [[ Setting options ]]
@@ -254,6 +258,27 @@ vim.o.completeopt = 'menuone,noselect'
 -- NOTE: You should make sure your terminal supports this
 vim.o.termguicolors = true
 
+-- [[ Additional setting options ]]
+
+-- Puts new vsplit windows to the right of the current
+vim.o.splitright = true
+
+-- Puts new split windows to the bottom of the current
+vim.o.splitbelow = true
+
+-- String to put at the start of lines that have been wrapped
+vim.o.showbreak = '↳\\'
+
+-- Spelling
+vim.o.spell = true
+vim.o.spelllang = 'en_us'
+
+-- Avoid wrap breaking words
+vim.o.linebreak = true
+
+-- screen column that is highlighted
+-- vim.o.colorcolumn = '80'
+
 -- [[ Basic Keymaps ]]
 
 -- Keymaps for better default experience
@@ -264,6 +289,45 @@ vim.keymap.set({ 'n', 'v' }, '<Space>', '<Nop>', { silent = true })
 vim.keymap.set('n', 'k', "v:count == 0 ? 'gk' : 'k'", { expr = true, silent = true })
 vim.keymap.set('n', 'j', "v:count == 0 ? 'gj' : 'j'", { expr = true, silent = true })
 
+-- [[ Additional basic keymaps ]]
+
+-- Exit insert mode
+vim.keymap.set('i', 'jk', '<esc>')
+
+-- Exit command mode
+vim.keymap.set('c', 'jk', '<C-c>')
+
+-- Use ALT+{h,j,k,l} navigate windows from any mode
+-- Terminal mode
+vim.keymap.set('t', '<A-h>', '<C-\\><C-N><C-w>h')
+vim.keymap.set('t', '<A-j>', '<C-\\><C-N><C-w>j')
+vim.keymap.set('t', '<A-k>', '<C-\\><C-N><C-w>k')
+vim.keymap.set('t', '<A-l>', '<C-\\><C-N><C-w>l')
+-- Insert mode
+vim.keymap.set('i', '<A-h>', '<C-\\><C-N><C-w>h')
+vim.keymap.set('i', '<A-j>', '<C-\\><C-N><C-w>j')
+vim.keymap.set('i', '<A-k>', '<C-\\><C-N><C-w>k')
+vim.keymap.set('i', '<A-l>', '<C-\\><C-N><C-w>l')
+-- Normal mode
+vim.keymap.set('n', '<A-h>', '<C-w>h')
+vim.keymap.set('n', '<A-j>', '<C-w>j')
+vim.keymap.set('n', '<A-k>', '<C-w>k')
+vim.keymap.set('n', '<A-l>', '<C-w>l')
+
+-- Buffers
+-- Switch to next buffer (buffer next)
+vim.keymap.set('n', '<leader>bn', ':bn<CR>')
+-- Switch to previous buffer (buffer previous)
+vim.keymap.set('n', '<leader>bp', ':bp<CR>')
+-- Split buffer (buffer split)
+vim.keymap.set('n', '<leader>bs', ':sb ')
+
+-- Use escape to exit terminal mode
+vim.keymap.set('t', '<Esc>', '<C-\\><C-n>')
+
+-- Use <C-v><Esc> to send an escape key to the underlying program
+vim.keymap.set('t', '<C-v><Esc>', '<Esc>')
+
 -- [[ Highlight on yank ]]
 -- See `:help vim.highlight.on_yank()`
 local highlight_group = vim.api.nvim_create_augroup('YankHighlight', { clear = true })
@@ -273,6 +337,11 @@ vim.api.nvim_create_autocmd('TextYankPost', {
   end,
   group = highlight_group,
   pattern = '*',
+})
+
+-- [[ Restore cursor position to its last location ]]
+vim.api.nvim_create_autocmd('BufReadPost', {
+  command = [[if line("'\"") > 1 && line("'\"") <= line("$") | execute "normal! g`\"" | endif]],
 })
 
 -- [[ Configure Telescope ]]
@@ -313,7 +382,7 @@ vim.keymap.set('n', '<leader>sd', require('telescope.builtin').diagnostics, { de
 -- See `:help nvim-treesitter`
 require('nvim-treesitter.configs').setup {
   -- Add languages to be installed here that you want installed for treesitter
-  ensure_installed = { 'c', 'cpp', 'go', 'lua', 'python', 'rust', 'tsx', 'typescript', 'vimdoc', 'vim' },
+  ensure_installed = { 'bash', 'c', 'cpp', 'go', 'latex', 'lua', 'markdown', 'markdown_inline', 'python', 'rust', 'vimdoc', 'vim' },
 
   -- Autoinstall languages that are not installed. Defaults to false (but you can change for yourself!)
   auto_install = false,
@@ -435,7 +504,25 @@ end
 --  If you want to override the default filetypes that your language server will attach to you can
 --  define the property 'filetypes' to the map in question.
 local servers = {
-  -- clangd = {},
+  clangd = {
+    root_pattern = {
+      '.clangd',
+      '.clang-tidy',
+      '.clang-format',
+      'compile_commands.json',
+      'compile_flags.txt',
+      'configure.ac',
+      '.git'
+    },
+  },
+  ltex = {
+    ltex = {
+      -- dictionary = { ['en-US'] = {} },
+      additionalRules = {
+        languageModel = vim.fn.getenv 'HOME' .. '/repos/ngrams',
+      },
+    },
+  },
   -- gopls = {},
   -- pyright = {},
   -- rust_analyzer = {},
@@ -446,6 +533,14 @@ local servers = {
     Lua = {
       workspace = { checkThirdParty = false },
       telemetry = { enable = false },
+      format = {
+        -- options: https://github.com/CppCXY/EmmyLuaCodeStyle/blob/master/lua.template.editorconfig
+        enable = true,
+        defaultConfig = {
+          align_array_table = "false",
+          max_line_length = "160",
+        },
+      },
     },
   },
 }
@@ -473,6 +568,17 @@ mason_lspconfig.setup_handlers {
       filetypes = (servers[server_name] or {}).filetypes,
     }
   end
+}
+
+-- [[ Configure null-ls ]]
+require('null-ls').setup {
+  on_attach = on_attach,
+  capabilities = capabilities,
+  filetypes = { 'markdown' },
+  sources = {
+    require('null-ls').builtins.formatting.prettier,
+    require('null-ls').builtins.diagnostics.markdownlint,
+  },
 }
 
 -- [[ Configure nvim-cmp ]]
