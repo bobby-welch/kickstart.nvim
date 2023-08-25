@@ -136,11 +136,11 @@ require('lazy').setup({
     'navarasu/onedark.nvim',
     priority = 1000,
     config = function()
+      vim.cmd.colorscheme 'onedark'
       vim.api.nvim_set_hl(0, 'Spellbad', { sp = 'NONE', undercurl = true })
       vim.api.nvim_set_hl(0, 'SpellCap', { sp = 'NONE', undercurl = true })
       vim.api.nvim_set_hl(0, 'SpellLocal', { sp = 'NONE', undercurl = true })
       vim.api.nvim_set_hl(0, 'SpellRare', { sp = 'NONE', undercurl = true })
-      vim.cmd.colorscheme 'onedark'
     end,
   },
 
@@ -277,7 +277,7 @@ vim.o.spelllang = 'en_us'
 vim.o.linebreak = true
 
 -- screen column that is highlighted
--- vim.o.colorcolumn = '80'
+vim.o.colorcolumn = '80'
 
 -- [[ Basic Keymaps ]]
 
