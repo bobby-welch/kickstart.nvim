@@ -154,6 +154,7 @@ require('lazy').setup({
         theme = 'onedark',
         component_separators = '|',
         section_separators = '',
+        disabled_filetypes = { 'toggleterm' },
       },
     },
   },
@@ -627,6 +628,11 @@ cmp.setup {
     { name = 'nvim_lsp' },
     { name = 'luasnip' },
   },
+}
+
+-- [[ Configure toggleterm ]]
+require("toggleterm").setup {
+  open_mapping = [[<c-\>]],
 }
 
 -- The line beneath this is called `modeline`. See `:help modeline`
